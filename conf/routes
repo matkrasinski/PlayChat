@@ -12,3 +12,6 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 #Routes for WebSocket chat Application
 GET     /chat                       controllers.WebSocketChat.index
 GET     /chatSocket                 controllers.WebSocketChat.socket
+
+POST     /authenticate        controllers.AuthenticationController.authenticate
+GET      /login               controllers.AuthenticationController.login
