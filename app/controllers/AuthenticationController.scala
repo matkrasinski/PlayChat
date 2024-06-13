@@ -25,6 +25,14 @@ class AuthenticationController @Inject()(cc: ControllerComponents) extends Abstr
     )
   )
 
+  val registerForm: Form[(String, String, String)] = Form(
+    tuple(
+      "username" -> text,
+      "password" -> text,
+      "confirmPassword" -> text
+    )
+  )
+
   // Secret key for signing the JWT token
   private val secretKey = "your-secret-key"
 
@@ -50,6 +58,10 @@ class AuthenticationController @Inject()(cc: ControllerComponents) extends Abstr
         }
       }
     )
+  }
+
+  def register: Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.register(registerForm))
   }
 
   // Action to handle secure endpoint with JWT token
