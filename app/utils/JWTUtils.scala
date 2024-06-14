@@ -6,6 +6,7 @@ import com.nimbusds.jwt.{JWTClaimsSet, SignedJWT}
 import play.api.libs.json.Json
 
 import java.time.Instant
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import scala.util.Try
@@ -14,12 +15,12 @@ object JWTUtils {
 
   // Secret key for signing the JWT token
   // NEED TO BE SET TO MAKE JWT WORK CORRECTLY
-  private val secretKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+  private val secretKey = "yJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7Imp3dFRva2VuIjoiZXlKaGJHY2lPaUpJVXpJMU5pSjkuZXlKemRXSWlPaUoxYzJWeUlpd2laWGh3SWpveE56RTRNemsxTURrNExDSnBZWFFpT2pFM01UZ3pPVE15T1RoOS5iRFFuaUM5MHRaUHNhX2tWZGVwR0o3OVhFRjNKRDVVUGVzUks0X29kWEtvIiwiY3NyZlRva2VuIjoiMTczZjllZjJmNzhjMDc3Y2MyYTM3MjRhNDMzYmQxNGQxYTRmNjE5Yy0xNzE4MzkzMjk4NzgwLWY3ZmE5OTg2OWU2MDJlZDMwYTJjMDQ0YSJ9LCJuYmYiOjE3MTgzOTMyOTgsImlhdCI6MTcxODM5MzI5OH0.M-H1YrP0IcKSjI7JDhf1MRZSExd299OC_Kg21DP99ks"
 
   // Generate JWT token
   def generateJWTToken(username: String): String = {
     val now = new Date()
-    val expirationTime = Date.from(Instant.now().plus(30, ChronoUnit.SECONDS))
+    val expirationTime = Date.from(Instant.now().plus(30, ChronoUnit.MINUTES))
     val claims = new JWTClaimsSet.Builder()
       .subject(username)
       .issueTime(now)
@@ -49,11 +50,13 @@ object JWTUtils {
     }.getOrElse(true)
   }
 
-  def validateNestedJWTToken(nestedJwt: String): Boolean = {
+  def validateNestedJWTToken(nestedJwt: String): (Boolean, String) = {
     val nested = SignedJWT.parse(nestedJwt)
     val nestedJson = nested.getPayload.toJSONObject.get("data")
 
-    validateJWTToken(extractJWTToken(nestedJson.toString))
+    val token = extractJWTToken(nestedJson.toString)
+
+    (validateJWTToken(token), extractUsername(token).orNull)
   }
 
   def extractJWTToken(input: String) = {

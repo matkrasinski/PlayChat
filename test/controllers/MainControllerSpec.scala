@@ -28,6 +28,7 @@ class MainControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
       val mainPage = controller.index().apply(FakeRequest(GET, "/"))
 
       redirectLocation(mainPage).get mustBe "/chat"
+      print(contentAsString(mainPage))
       status(mainPage) mustBe SEE_OTHER
     }
 

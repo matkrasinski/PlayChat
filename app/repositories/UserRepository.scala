@@ -13,10 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class UserRepository @Inject() (
-                               implicit executionContext: ExecutionContext,
-                               reactiveMongoApi: ReactiveMongoApi
-                               ) {
+class UserRepository @Inject() (implicit executionContext: ExecutionContext, reactiveMongoApi: ReactiveMongoApi) {
   def collection: Future[BSONCollection] = reactiveMongoApi.database.map(_.collection("users"))
 
   def findAll(limit: Int = 100): Future[Seq[User]] = {

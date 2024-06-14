@@ -15,5 +15,5 @@ class ChatManager extends Actor {
 
 object ChatManager {
   case class NewChatter(chatter: ActorRef)
-  private case class Message(msg: String)
+  case class Message(msg: String)
 }
