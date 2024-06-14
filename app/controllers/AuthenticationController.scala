@@ -1,21 +1,19 @@
 package controllers
 
-import javax.inject._
-import play.api.mvc._
-import play.api.data._
+import models.UserBuilder
 import play.api.data.Forms._
-import com.nimbusds.jose.{JWSAlgorithm, JWSHeader, JWSObject, JWSSigner, Payload}
-import com.nimbusds.jose.crypto.{MACSigner, MACVerifier}
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
-import play.api.libs.json.Json
+import play.api.data._
+import play.api.mvc._
+import repositories.UserRepository
+import utils.JWTUtils.generateJWTToken
 
-import java.util.Date
-import java.time.Instant
-import java.time.temporal.ChronoUnit
+import javax.inject._
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AuthenticationController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
+class AuthenticationController @Inject()(implicit executionContext: ExecutionContext,
+                                         userRepository: UserRepository,
+                                         cc: ControllerComponents) extends AbstractController(cc) {
 
   // Define a form mapping for the username and password
   val loginForm: Form[(String, String)] = Form(
@@ -33,70 +31,62 @@ class AuthenticationController @Inject()(cc: ControllerComponents) extends Abstr
     )
   )
 
-  // Secret key for signing the JWT token
-  private val secretKey = "your-secret-key"
-
   // Action to display the login form
-  def login: Action[AnyContent] = Action { implicit request =>
+  def login: Action[AnyContent] = Action { implicit _ =>
     Ok(views.html.login(loginForm))
   }
 
-  // Action to handle form submission
-  def authenticate: Action[AnyContent] = Action { implicit request =>
-    loginForm.bindFromRequest.fold(
+//   Action to handle form submission
+  def authenticate: Action[AnyContent] = Action.async { implicit request =>
+    loginForm.bindFromRequest().fold(
       formWithErrors => {
-        BadRequest(views.html.login(formWithErrors))
+        Future.successful(BadRequest(views.html.login(formWithErrors)))
       },
       userData => {
-        // Perform authentication logic here, e.g. check username and password against a database
         val (username, password) = userData
-        if (username == "admin" && password == "password123") {
-          val token = generateJWTToken(username)
-          Ok(Json.obj("token" -> token))
-        } else {
-          Unauthorized("Invalid username or password")
+
+        userRepository.findByUsername(username).flatMap {
+          case Some(user) =>
+            if (user.username == user.username && password == user.password) {
+              val token = generateJWTToken(username)
+
+              Future.successful(Redirect(routes.WebSocketChat.index)
+                .withSession("jwtToken" -> token))
+            } else {
+              Future.successful(Unauthorized(views.html.login(loginForm.withGlobalError("Invalid username or password"))))
+            }
+          case None => Future.successful(Unauthorized(views.html.login(loginForm.withGlobalError("User does not exist"))))
         }
       }
     )
   }
 
-  def register: Action[AnyContent] = Action { implicit request =>
+  def register: Action[AnyContent] = Action { implicit _ =>
     Ok(views.html.register(registerForm))
   }
 
-  // Action to handle secure endpoint with JWT token
-  def secureEndpoint: Action[AnyContent] = Action { implicit request =>
-    request.headers.get("Authorization") match {
-      case Some(jwtToken) =>
-        if (validateJWTToken(jwtToken)) {
-          Ok("Welcome!")
+  def createUser : Action[AnyContent] = Action {implicit request => {
+    registerForm.bindFromRequest().fold(
+      formWithErrors => {
+        BadRequest(views.html.register(formWithErrors))
+      },
+      userData => {
+        val (username, password, confirmPassword) = userData
+        if (password != confirmPassword) {
+          BadRequest(views.html.register(registerForm.withGlobalError("Password and ConfirmPassword fields should be the same")))
         } else {
-          Unauthorized("Invalid token")
+          // CREATE NEW USER
+          val newUser = UserBuilder()
+            .withUsername(username)
+            .withEmail("example@gmail.com")
+            .withPassword(password)
+            .build()
+
+          userRepository.create(newUser)
+
+          Redirect(routes.AuthenticationController.login)
         }
-      case None =>
-        Unauthorized("No token provided")
-    }
-  }
-
-  // Generate JWT token
-  private def generateJWTToken(username: String): String = {
-    val now = new Date()
-    val expirationTime = Date.from(Instant.now().plus(1, ChronoUnit.HOURS))
-    val claims = new JWTClaimsSet.Builder()
-      .subject(username)
-      .issueTime(now)
-      .expirationTime(expirationTime)
-      .build()
-    val signer: JWSSigner = new MACSigner(secretKey)
-    val jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.HS256), new Payload(claims.toJSONObject))
-    jwsObject.sign(signer)
-    jwsObject.serialize()
-  }
-
-  // Validate JWT token
-  private def validateJWTToken(jwtToken: String): Boolean = {
-    val signedJWT = SignedJWT.parse(jwtToken)
-    val verifier = new MACVerifier(secretKey)
-    signedJWT.verify(verifier)
-  }
+      }
+    )
+  }}
 }
