@@ -14,12 +14,12 @@ object JWTUtils {
 
   // Secret key for signing the JWT token
   // NEED TO BE SET TO MAKE JWT WORK CORRECTLY
-  private val secretKey = "secret-key"
+  private val secretKey = "eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7Imp3dFRva2VuIjoiZXlKaGJHY2lPaUpJVXpJMU5pSjkuZXlKemRXSWlPaUpoWkcxcGJpSXNJbVY0Y0NJNk1UY3hPRE0yTVRjME5pd2lhV0YwSWpveE56RTRNell4TnpNMmZRLlp0SkRjbzgxdURfanhmUklpc0t3eHNmNmROcGFfcnJqM3NFNzNZV1FoYjgiLCJjc3JmVG9rZW4iOiJlMjMzMTE2NWRmMzNjNmM5ZWRjZDdlOGRmOTNiMGJmMzEwYmQ0ODhlLTE3MTgzNjE3MzcwNDktZmIwYjJkY2M4YmNkNTJjMjMxMDVlNDMwIn0sIm5iZiI6MTcxODM2MTczNywiaWF0IjoxNzE4MzYxNzM3fQ.Em6AXme7ANxqub3il9V7psFh46GWxeinlNKPkULO4VY"
 
   // Generate JWT token
   def generateJWTToken(username: String): String = {
     val now = new Date()
-    val expirationTime = Date.from(Instant.now().plus(30, ChronoUnit.SECONDS))
+    val expirationTime = Date.from(Instant.now().plus(30, ChronoUnit.MINUTES))
     val claims = new JWTClaimsSet.Builder()
       .subject(username)
       .issueTime(now)

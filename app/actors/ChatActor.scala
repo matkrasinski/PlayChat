@@ -1,5 +1,6 @@
 package actors
 
+import actors.ChatActor.SendMessage
 import org.apache.pekko.actor.{Actor, ActorRef, Props}
 import play.api.libs.json._
 import utils.JWTUtils
@@ -24,11 +25,11 @@ class ChatActor(out: ActorRef, manager: ActorRef) extends Actor {
           } else {
             val message = (jsonMsg \ "msg").get.toString()
 
-            out ! message.substring(1, message.length - 1)
+            manager ! ChatManager.Message(message.substring(1, message.length - 1))
           }
-        case Failure(_) =>
-          out ! msg
+        case Failure(_) => manager ! ChatManager.Message(msg)
       }
+    case SendMessage(msg) => out ! msg
   }
 }
 
