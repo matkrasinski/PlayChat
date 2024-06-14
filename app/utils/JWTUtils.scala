@@ -14,7 +14,7 @@ object JWTUtils {
 
   // Secret key for signing the JWT token
   // NEED TO BE SET TO MAKE JWT WORK CORRECTLY
-  private val secretKey = "secret-key"
+  private val secretKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
   // Generate JWT token
   def generateJWTToken(username: String): String = {
