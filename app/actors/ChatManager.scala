@@ -6,7 +6,7 @@ class ChatManager extends Actor {
   private var chatters = List.empty[ActorRef]
 
   import ChatManager._
-  def receive = {
+  def receive: Receive = {
     case NewChatter(chatter) => chatters ::= chatter
     case Message(msg) => for (c <- chatters) c ! ChatActor.SendMessage(msg)
     case m => println("Unhandled message in ChatManager: " + m)
@@ -15,5 +15,5 @@ class ChatManager extends Actor {
 
 object ChatManager {
   case class NewChatter(chatter: ActorRef)
-  case class Message(msg: String)
+  private case class Message(msg: String)
 }
