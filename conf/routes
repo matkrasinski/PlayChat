@@ -29,11 +29,3 @@ GET     /users/:id            controllers.UserController.findOne(id: String)
 POST    /users                controllers.UserController.create()
 PUT     /users/:id            controllers.UserController.update(id: String)
 DELETE  /users/:id            controllers.UserController.delete(id: String)
-
-
-
-GET     /userChats                  controllers.UserChatController.getAllUserChats
-GET     /userChats/:userId          controllers.UserChatController.getUserChats(userId: String)
-POST    /userChats                  controllers.UserChatController.createUserChat
-
-GET     /usersChatts                controllers.UserChatController.index

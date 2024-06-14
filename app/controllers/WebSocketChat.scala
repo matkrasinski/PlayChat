@@ -1,30 +1,48 @@
 package controllers
 
 import actors.{ChatActor, ChatManager}
+import models.UserChat
 import org.apache.pekko.actor.{ActorRef, ActorSystem, Props}
 import org.apache.pekko.stream.Materializer
+import org.joda.time.DateTimeZone
+import play.api.libs.json.{JsObject, Json}
 import play.api.libs.streams.ActorFlow
 import play.api.mvc._
+import repositories.UserChatRepository
 import utils.JWTUtils
 
+import java.time.format.{DateTimeFormatter, FormatStyle}
 import javax.inject._
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
-class WebSocketChat @Inject() (cc: ControllerComponents)(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
+class WebSocketChat @Inject() (cc: ControllerComponents)
+                              (implicit system: ActorSystem,
+                               userChatRepository: UserChatRepository,
+                               mat: Materializer,
+                               executionContext: ExecutionContext
+                              ) extends AbstractController(cc) {
   val manager: ActorRef = system.actorOf(Props[ChatManager], "Manager")
 
-  def index: Action[AnyContent] = Action { implicit request =>
+  def index: Action[AnyContent] = Action.async { implicit request =>
     request.session.get("jwtToken") match {
       case Some(jwtToken) if JWTUtils.validateJWTToken(jwtToken) =>
         JWTUtils.extractUsername(jwtToken) match {
           case Some(username) =>
-            Ok(views.html.chatPage(username))
+
+            userChatRepository.findAll().flatMap {
+              case userChats =>
+                Future.successful(Ok(views.html.chatPage.apply(username = username, messages = userChats.toArray)))
+              case _ =>
+                Future.successful(Ok(views.html.chatPage.apply(username = username, messages = Array.empty)))
+            }
+
           case None =>
-            Redirect(routes.AuthenticationController.login)
+            Future.successful(Redirect(routes.AuthenticationController.login))
         }
       case _ =>
-        Redirect(routes.AuthenticationController.login)
+        Future.successful(Redirect(routes.AuthenticationController.login))
     }
   }
 
@@ -34,7 +52,7 @@ class WebSocketChat @Inject() (cc: ControllerComponents)(implicit system: ActorS
         JWTUtils.extractUsername(jwtToken) match {
           case Some(_) =>
             Future.successful(Right(ActorFlow.actorRef { out =>
-              ChatActor.props(out, manager)
+              ChatActor.props(userChatRepository, out, manager)
             }))
         }
     }

@@ -9,41 +9,58 @@ import repositories.UserChatRepository
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UserChatController @Inject() (
-                                     cc: ControllerComponents,
-                                     userChatRepository: UserChatRepository
+class UserChatController @Inject() (cc: ControllerComponents,
+                                    userChatRepository: UserChatRepository
                                    )(implicit ec: ExecutionContext) extends AbstractController(cc) {
 
-  def index: Action[AnyContent] = Action.async { implicit _: Request[AnyContent] =>
-    userChatRepository.findAll().map { userChats =>
-      Ok(views.html.userChatsPage(userChats))
-    }
-  }
-
+//  def index: Action[AnyContent] = Action.async { implicit _: Request[AnyContent] =>
+//    userChatRepository.findAll().map { userChats =>
+//      Ok(views.html.userChatsPage(userChats))
+//    }
+//  }
+//
   def getAllUserChats: Action[AnyContent] = Action.async {
     userChatRepository.findAll().map { userChats =>
       Ok(Json.toJson(userChats))
     }
   }
+//
+//  def getUserChats(userId: String): Action[AnyContent] = Action.async {
+//    userChatRepository.findUserChats(userId).map { userChats =>
+//      Ok(Json.toJson(userChats))
+//    }
+//  }
 
-  def getUserChats(userId: String): Action[AnyContent] = Action.async {
-    userChatRepository.findUserChats(userId).map { userChats =>
-      Ok(Json.toJson(userChats))
-    }
-  }
-
-  def createUserChat: Action[AnyContent] = Action.async { request =>
-    request.body.asJson.map { json =>
+  def saveMessage(userChat : UserChat): Action[AnyContent] = Action.async { request => {
+    request.body.asJson.map { json => {
       json.validate[UserChat].fold(
         errors => Future.successful(BadRequest(JsError.toJson(errors))),
         userChat => {
-          userChatRepository.createUserChat(userChat).map { _ =>
+          userChatRepository.create(userChat).map {_ => {
             Created(Json.toJson(userChat))
-          }.recover {
-            case ex: Exception => Conflict(Json.obj("message" -> ex.getMessage))
+          }}.recover {
+            case exception: Exception => Conflict(Json.obj("message" -> exception.getMessage))
           }
         }
       )
-    }.getOrElse(Future.successful(BadRequest("Invalid JSON")))
+    }}.getOrElse(Future.successful(BadRequest("Invalid JSON")))
   }
+
+  }
+
+//
+//  def createUserChat: Action[AnyContent] = Action.async { request =>
+//    request.body.asJson.map { json =>
+//      json.validate[UserChat].fold(
+//        errors => Future.successful(BadRequest(JsError.toJson(errors))),
+//        userChat => {
+//          userChatRepository.createUserChat(userChat).map { _ =>
+//            Created(Json.toJson(userChat))
+//          }.recover {
+//            case ex: Exception => Conflict(Json.obj("message" -> ex.getMessage))
+//          }
+//        }
+//      )
+//    }.getOrElse(Future.successful(BadRequest("Invalid JSON")))
+//  }
 }

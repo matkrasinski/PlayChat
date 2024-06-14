@@ -1,11 +1,21 @@
-@(username: String)(implicit request: RequestHeader, flash: Flash)
+@import org.joda.time.format.DateTimeFormat
+
+@import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+@import org.joda.time.DateTime
+@import java.util.Locale
+@(username: String, messages: Array[UserChat])(implicit request: RequestHeader, flash: Flash)
 
 @main("WebSocket Chat") {
-    <input id="user-name" type="text" value="@username" readonly>
-@*    <button id="submit-name">Submit</button>*@
-    <input type="hidden" id="ws-route" value="@routes.WebSocketChat.socket.absoluteURL()">
-    <input type="text" id="chat-input" size="80">
-    <br>
-    <textarea id="chat-area" rows="15" cols="80" disabled></textarea>
-    <script src="@routes.Assets.versioned("javascripts/chat.js")"></script>
+<input id="user-name" type="text" value="@username" readonly>
+<input type="hidden" id="ws-route" value="@routes.WebSocketChat.socket.absoluteURL()">
+<input type="text" id="chat-input" size="80">
+<br>
 }
+<textarea id="chat-area" rows="15" cols="80" disabled>
+@for(userChat <- messages){[@{
+    val formatter: DateTimeFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH)
+
+    userChat.dateTime.get.toString(formatter) }] @userChat.userName - @userChat.message    &#10;}
+</textarea>
+
+<script src="@routes.Assets.versioned("javascripts/chat.js")"></script>
