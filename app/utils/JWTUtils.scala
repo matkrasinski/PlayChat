@@ -10,12 +10,14 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import scala.util.Try
+import io.github.cdimascio.dotenv.Dotenv
 
 object JWTUtils {
 
   // Secret key for signing the JWT token
   // NEED TO BE SET TO MAKE JWT WORK CORRECTLY
-  private val secretKey = "yJhbGciOiJIUzI1NiJ9.eyJkYXRhIjp7Imp3dFRva2VuIjoiZXlKaGJHY2lPaUpJVXpJMU5pSjkuZXlKemRXSWlPaUoxYzJWeUlpd2laWGh3SWpveE56RTRNemsxTURrNExDSnBZWFFpT2pFM01UZ3pPVE15T1RoOS5iRFFuaUM5MHRaUHNhX2tWZGVwR0o3OVhFRjNKRDVVUGVzUks0X29kWEtvIiwiY3NyZlRva2VuIjoiMTczZjllZjJmNzhjMDc3Y2MyYTM3MjRhNDMzYmQxNGQxYTRmNjE5Yy0xNzE4MzkzMjk4NzgwLWY3ZmE5OTg2OWU2MDJlZDMwYTJjMDQ0YSJ9LCJuYmYiOjE3MTgzOTMyOTgsImlhdCI6MTcxODM5MzI5OH0.M-H1YrP0IcKSjI7JDhf1MRZSExd299OC_Kg21DP99ks"
+  private val dotenv = Dotenv.load()
+  private val secretKey = dotenv.get("JWT_SECRET")
 
   // Generate JWT token
   def generateJWTToken(username: String): String = {

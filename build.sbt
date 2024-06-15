@@ -18,7 +18,8 @@ libraryDependencies ++= Seq(
   // Provide JSON serialization for Joda-Time
   "com.typesafe.play" %% "play-json-joda" % "2.7.4",
   "com.nimbusds" % "nimbus-jose-jwt" % "9.40",
-  "org.mindrot" % "jbcrypt" % "0.4"
+  "org.mindrot" % "jbcrypt" % "0.4",
+  "io.github.cdimascio" % "dotenv-java" % "3.0.0",
 )
 
 
