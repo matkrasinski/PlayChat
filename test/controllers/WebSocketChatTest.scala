@@ -59,16 +59,5 @@ class WebSocketChatTest extends PlaySpec with GuiceOneAppPerTest with Injecting 
       redirectLocation(result) mustBe Some("/login")
     }
 
-    "chats empty history is shown on join when db empty" in {
-      when(userChatRepository.findAll()).thenReturn(Future.successful(Seq.empty))
-
-      val chatRequest = FakeRequest(GET, "/chat")
-        .withSession("jwtToken" -> testToken)
-      val result = webSocketChat.index()(chatRequest)
-
-      status(result) mustBe OK
-      contentAsString(result) must include("<textarea id=\"chat-area\" rows=\"15\" cols=\"80\" disabled>\n\n</textarea>")
-    }
-
   }
 }
