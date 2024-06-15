@@ -33,8 +33,14 @@ class UserRepository @Inject() (implicit executionContext: ExecutionContext, rea
 
 
   def create(user: User): Future[WriteResult] = {
-    collection.flatMap(_.insert(ordered = false)
-      .one(user.copy()))
+    collection.flatMap { col =>
+      col.find(BSONDocument("username" -> user.username), None).one[User].flatMap {
+        case Some(_) =>
+          Future.failed(new Exception("Username already exists"))
+        case None =>
+          col.insert(ordered = false).one(user.copy())
+      }
+    }
   }
 
   def update(id: BSONObjectID, user: User):Future[WriteResult] = {

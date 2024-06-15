@@ -14,8 +14,9 @@
 <textarea id="chat-area" rows="15" cols="80" disabled>
 @for(userChat <- messages){[@{
     val formatter: DateTimeFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH)
-
-    userChat.dateTime.get.toString(formatter) }] @userChat.userName - @userChat.message    &#10;}
+    userChat.dateTime.get.toString(formatter) + "] " + userChat.userName + " - " + userChat.message}&#10;}
 </textarea>
+
+<button id="logout-button">Log out</button>
 
 <script src="@routes.Assets.versioned("javascripts/chat.js")"></script>
