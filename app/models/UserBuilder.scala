@@ -2,12 +2,12 @@ package models
 
 
 import reactivemongo.bson.BSONObjectID
+import utils.PasswordUtils
 
 
 case class UserBuilder private (
                                  _id: BSONObjectID = null,
                                  username: String = "",
-                                 email: String = "",
                                  password: String = ""
                                ) {
   def withId(BSONObjectID: BSONObjectID): UserBuilder = {
@@ -18,18 +18,13 @@ case class UserBuilder private (
     copy(username = username)
   }
 
-  def withEmail(email: String): UserBuilder = {
-    copy(email = email)
-  }
-
   def withPassword(password: String): UserBuilder = {
-    copy(password = password)
+    copy(password = PasswordUtils.hashPassword(password))
   }
 
   def build() = new User (
       _id = Option(_id),
       username = username,
-      email = email,
       password = password
   )
 }

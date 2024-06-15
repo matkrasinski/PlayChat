@@ -9,7 +9,6 @@ import reactivemongo.bson._
 
 case class User (_id: Option[BSONObjectID],
                  username: String,
-                 email: String,
                  password: String)
 
 object User {
@@ -19,7 +18,6 @@ object User {
       User(
         doc.getAs[BSONObjectID]("_id"),
         doc.getAs[String]("username").get,
-        doc.getAs[String]("email").get,
         doc.getAs[String]("password").get
       )
     }
@@ -29,7 +27,6 @@ object User {
       BSONDocument(
         "_id" -> user._id,
         "username" -> user.username,
-        "email" -> user.email,
         "password" -> user.password
       )
     }

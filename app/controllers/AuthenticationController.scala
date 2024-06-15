@@ -9,6 +9,7 @@ import utils.JWTUtils.generateJWTToken
 
 import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
+import utils.PasswordUtils
 
 @Singleton
 class AuthenticationController @Inject()(implicit executionContext: ExecutionContext,
@@ -18,21 +19,21 @@ class AuthenticationController @Inject()(implicit executionContext: ExecutionCon
   // Define a form mapping for the username and password
   val loginForm: Form[(String, String)] = Form(
     tuple(
-      "username" -> text,
-      "password" -> text
+      "username" -> nonEmptyText,
+      "password" -> nonEmptyText
     )
   )
 
   val registerForm: Form[(String, String, String)] = Form(
     tuple(
-      "username" -> text,
-      "password" -> text,
-      "confirmPassword" -> text
+      "username" -> nonEmptyText,
+      "password" -> nonEmptyText,
+      "confirmPassword" -> nonEmptyText
     )
   )
 
   // Action to display the login form
-  def login: Action[AnyContent] = Action { implicit _ =>
+  def login: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.login(loginForm))
   }
 
@@ -47,7 +48,7 @@ class AuthenticationController @Inject()(implicit executionContext: ExecutionCon
 
         userRepository.findByUsername(username).flatMap {
           case Some(user) =>
-            if (user.username == user.username && password == user.password) {
+            if (user.username == user.username && PasswordUtils.checkPassword(password, user.password)) {
               val token = generateJWTToken(username)
 
               Future.successful(Redirect(routes.WebSocketChat.index)
@@ -61,30 +62,31 @@ class AuthenticationController @Inject()(implicit executionContext: ExecutionCon
     )
   }
 
-  def register: Action[AnyContent] = Action { implicit _ =>
+  def register: Action[AnyContent] = Action { implicit request =>
     Ok(views.html.register(registerForm))
   }
 
-  def createUser : Action[AnyContent] = Action {implicit request => {
+  def createUser : Action[AnyContent] = Action.async {implicit request => {
     registerForm.bindFromRequest().fold(
       formWithErrors => {
-        BadRequest(views.html.register(formWithErrors))
+        Future.successful(BadRequest(views.html.register(formWithErrors)))
       },
       userData => {
         val (username, password, confirmPassword) = userData
         if (password != confirmPassword) {
-          BadRequest(views.html.register(registerForm.withGlobalError("Password and ConfirmPassword fields should be the same")))
+          Future.successful(BadRequest(views.html.register(registerForm.withGlobalError("Password and ConfirmPassword fields should be the same"))))
         } else {
-          // CREATE NEW USER
           val newUser = UserBuilder()
             .withUsername(username)
-            .withEmail("example@gmail.com")
             .withPassword(password)
             .build()
 
-          userRepository.create(newUser)
-
-          Redirect(routes.AuthenticationController.login)
+          userRepository.create(newUser).map { _ =>
+            Redirect(routes.AuthenticationController.login)
+          }.recover {
+            case e: Exception =>
+              InternalServerError(views.html.register(registerForm.withGlobalError("Error creating user: " + e.getMessage)))
+          }
         }
       }
     )

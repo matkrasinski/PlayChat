@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "org.reactivemongo" %% "reactivemongo-bson-compat" % "0.20.13",
   // Provide JSON serialization for Joda-Time
   "com.typesafe.play" %% "play-json-joda" % "2.7.4",
-  "com.nimbusds" % "nimbus-jose-jwt" % "9.40"
+  "com.nimbusds" % "nimbus-jose-jwt" % "9.40",
+  "org.mindrot" % "jbcrypt" % "0.4"
 )
 
 

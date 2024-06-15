@@ -6,7 +6,6 @@ import org.apache.pekko.actor.{Actor, ActorRef, Props}
 import play.api.libs.json._
 import repositories.UserChatRepository
 import utils.JWTUtils
-import org.joda.time.DateTimeZone.UTC
 
 import javax.inject.Inject
 import scala.util.{Failure, Success, Try}
