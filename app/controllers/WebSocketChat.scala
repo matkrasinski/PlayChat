@@ -20,7 +20,6 @@ import scala.util.{Failure, Success}
 class WebSocketChat @Inject() (cc: ControllerComponents)
                               (implicit system: ActorSystem,
                                userChatRepository: UserChatRepository,
-                               mat: Materializer,
                                executionContext: ExecutionContext
                               ) extends AbstractController(cc) {
   val manager: ActorRef = system.actorOf(Props[ChatManager], "Manager")

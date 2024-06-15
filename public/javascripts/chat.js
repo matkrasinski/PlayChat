@@ -28,12 +28,34 @@ function clearAllCookies() {
     });
 }
 
+// Function to scroll the textarea to the bottom
+function scrollToBottom() {
+    outputArea.scrollTop = outputArea.scrollHeight;
+}
+
+// Scroll to bottom initially and whenever the content is updated
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottom();  // Initial scroll to bottom
+
+    // Simulate content update and scroll to bottom
+    // In a real app, you would replace this with actual content update logic
+    setInterval(function() {
+        var chatArea = document.getElementById('chat-area');
+        scrollToBottom();
+    }, 3000);  // Simulate a new message every 3 seconds
+});
+
 
 // ON ACTION
 
 setTimeout(() => {
+
     socket.send( getCurrentDateUTC()  + userName.value + " just joined the chat");
-}, 500);
+}, 0);
+
+setTimeout(() => {
+    scrollToBottom()
+}, 0)
 
 
 inputField.onkeydown = (event) => {
@@ -46,6 +68,10 @@ inputField.onkeydown = (event) => {
         });
 
         socket.send(msgWithToken);
+
+        setTimeout(() => {
+            scrollToBottom()
+        }, 100)
         inputField.value = '';
     }
 }
