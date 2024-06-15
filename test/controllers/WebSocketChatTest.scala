@@ -2,17 +2,13 @@ package controllers
 
 import models.UserChat
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.http.scaladsl.model.HttpHeader.ParsingResult.Ok
-import org.apache.pekko.stream.javadsl.Flow
 import org.joda.time.DateTime
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import org.scalatest.concurrent.Futures.whenReady
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
-import play.api.http.Status.{OK, SEE_OTHER, SWITCHING_PROTOCOLS}
+import play.api.http.Status.{OK, SEE_OTHER}
 import play.api.test.Helpers.{GET, contentAsString, defaultAwaitTimeout, redirectLocation, status, stubControllerComponents}
 import play.api.test.{FakeRequest, Injecting}
 import repositories.UserChatRepository
