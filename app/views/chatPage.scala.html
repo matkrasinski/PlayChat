@@ -5,18 +5,73 @@
 @import java.util.Locale
 @(username: String, messages: Array[UserChat])(implicit request: RequestHeader, flash: Flash)
 
-@main("WebSocket Chat") {
-<input id="user-name" type="text" value="@username" readonly>
-<input type="hidden" id="ws-route" value="@routes.WebSocketChat.socket.absoluteURL()">
-<input type="text" id="chat-input" size="80">
-<br>
-}
-<textarea id="chat-area" rows="15" cols="80" disabled>
-@for(userChat <- messages){[@{
-    val formatter: DateTimeFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH)
-    userChat.dateTime.get.toString(formatter) + "] " + userChat.userName + " - " + userChat.message}&#10;}
-</textarea>
+    @main("WebSocket Chat") {
+        <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f5f5f5;
+                }
+                #chat-container {
+                    max-width: 800px;
+                    margin: 20px auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                }
+                #user-name {
+                    width: calc(100% - 20px);
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    box-sizing: border-box;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    background-color: #eee;
+                }
+                #chat-input {
+                    width: calc(100% - 20px);
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    box-sizing: border-box;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                }
+                #chat-area {
+                    width: calc(100% - 20px);
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    box-sizing: border-box;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    resize: none;
+                    background-color: #f9f9f9;
+                }
+                #logout-button {
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #d9534f;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                #logout-button:hover {
+                    background-color: #c9302c;
+                }
+        </style>
+        <div id="chat-container">
+            <input id="user-name" type="text" value="@username" readonly>
+            <input type="hidden" id="ws-route" value="@routes.WebSocketChat.socket.absoluteURL()">
+            <input type="text" id="chat-input" size="80">
+            <br>
+            <textarea id="chat-area" rows="15" cols="80" disabled>
+@for(userChat <- messages){[@{val formatter: DateTimeFormatter = DateTimeFormat.forPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH)
+userChat.dateTime.get.toString(formatter) + "] " + userChat.userName + " - " + userChat.message}&#10;}
+            </textarea>
+            <button id="logout-button">Log out</button>
+        </div>
 
-<button id="logout-button">Log out</button>
-
-<script src="@routes.Assets.versioned("javascripts/chat.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/chat.js")"></script>
+    }
