@@ -39,10 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Simulate content update and scroll to bottom
     // In a real app, you would replace this with actual content update logic
-    setInterval(function() {
+    setTimeout(function() {
         var chatArea = document.getElementById('chat-area');
         scrollToBottom();
-    }, 3000);  // Simulate a new message every 3 seconds
+    }, 100);
 });
 
 
